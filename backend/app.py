@@ -34,7 +34,8 @@ def get_tasks():
         "priority": t.priority,
         "date": getattr(t, "date", None),
         "completed": getattr(t, "completed", False),
-        "progress": getattr(t, "progress", 0)
+        "progress": getattr(t, "progress", 0),
+        "status": getattr(t, "status", "pending")
     } for t in tasks]
     return jsonify(task_list)
 
@@ -54,10 +55,33 @@ def delete_task(task_id):
 
 @app.route("/complete-task/<int:task_id>", methods=["PUT"])
 def complete_task(task_id):
+    from datetime import datetime
     for task in tasks:
         if task.id == task_id:
-            task.completed = not task.completed
-            return jsonify({"message": "Task completion status toggled", "completed": task.completed})
+            # Toggle: if already done, revert to pending
+            if task.completed:
+                task.completed = False
+                task.status = "pending"
+                return jsonify({"message": "Task marked as pending", "completed": False, "status": "pending"})
+            
+            # Marking as complete — check if past deadline
+            task.completed = True
+            now = datetime.now()
+            try:
+                task_date = task.date or now.strftime("%Y-%m-%d")
+                deadline_dt = datetime.strptime(
+                    f"{task_date} {int(task.deadline):02d}:00",
+                    "%Y-%m-%d %H:%M"
+                )
+                task.status = "late" if now > deadline_dt else "completed"
+            except Exception:
+                task.status = "completed"
+
+            return jsonify({
+                "message": f"Task marked as {task.status}",
+                "completed": True,
+                "status": task.status
+            })
     return jsonify({"error": "Task not found"}), 404
 
 @app.route("/update-progress/<int:task_id>", methods=["PUT"])
@@ -96,6 +120,28 @@ def compare():
         "greedy_tasks": len(greedy_result), 
         "bruteforce_profit": brute_profit 
     })
+
+@app.route("/check-missed", methods=["POST"])
+def check_missed():
+    """Mark overdue, incomplete tasks as 'missed'."""
+    from datetime import datetime
+    now = datetime.now()
+    updated = []
+    for task in tasks:
+        if task.completed or task.status == "missed":
+            continue
+        try:
+            task_date = task.date or now.strftime("%Y-%m-%d")
+            deadline_dt = datetime.strptime(
+                f"{task_date} {int(task.deadline):02d}:00",
+                "%Y-%m-%d %H:%M"
+            )
+            if now > deadline_dt:
+                task.status = "missed"
+                updated.append(task.id)
+        except Exception:
+            pass
+    return jsonify({"message": "Missed tasks updated", "updated_ids": updated})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)

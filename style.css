@@ -24,7 +24,82 @@
   background: #16161a;
   color: #f3f4f6;
 }
-/* FullCalendar day header styling for dark mode */
+/* ── Status badges ────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.status-completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-late {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-missed {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* ── Task item status variants ────────────────────────── */
+.task-item.status-missed {
+  border-left-color: #9ca3af;
+  opacity: 0.85;
+}
+
+.task-item.status-late {
+  border-left-color: #f59e0b;
+}
+
+.task-item.status-completed {
+  border-left-color: #10b981;
+}
+
+/* Missed task: grey out text */
+.task-item.status-missed .task-text {
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
+.dark-mode .task-item.status-missed .task-text {
+  color: #9ca3af;
+}
+
+.dark-mode .status-completed {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+.dark-mode .status-late {
+  background: #451a03;
+  color: #fcd34d;
+}
+
+.dark-mode .status-missed {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+/* "Mark Late" button — amber */
+.task-late-btn {
+  background-color: #f59e0b !important;
+  color: #fff !important;
+}
+.task-late-btn:hover {
+  background-color: #d97706 !important;
+}
+
+/* ── Nighttime/Nightmode ────────────────────────────────── */
+
 .dark-mode .fc-col-header-cell {
   background: #232946 !important;
   color: #35b6ff !important;

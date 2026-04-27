@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
   displayTasks();
   loadCalendarEvents();
   
+  // Check for missed tasks on load and every minute
+  checkForMissedTasks();
+  setInterval(checkForMissedTasks, 60 * 1000);
+  
   // Request notification permission
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
@@ -62,16 +66,29 @@ function loadCalendarEvents() {
         const hour = task.deadline;
         const startTime = `${String(hour).padStart(2, '0')}:00`;
         const endTime = `${String(hour + task.duration).padStart(2, '0')}:00`;
-        
-        // Don't show completed tasks on calendar
-        if (!task.completed) {
-          calendar.addEvent({
-            title: task.name,
-            start: `${eventDate}T${startTime}`,
-            end: `${eventDate}T${endTime}`,
-            color: getPriorityColor(task.priority)
-          });
+
+        const status = task.status || (task.completed ? "completed" : "pending");
+
+        // Color by status first, then priority
+        let eventColor;
+        if (status === "missed") {
+          eventColor = "#6b7280"; // grey
+        } else if (status === "late") {
+          eventColor = "#f59e0b"; // amber
+        } else if (task.completed) {
+          eventColor = "#10b981"; // green tick
+        } else {
+          eventColor = getPriorityColor(task.priority);
         }
+
+        const titlePrefix = status === "missed" ? "✗ " : status === "late" ? "⚠ " : "";
+
+        calendar.addEvent({
+          title: titlePrefix + task.name,
+          start: `${eventDate}T${startTime}`,
+          end: `${eventDate}T${endTime}`,
+          color: eventColor
+        });
       });
     })
     .catch(err => console.error("Error loading calendar events: " + err));
@@ -137,20 +154,39 @@ function displayTasks() {
         const hour = task.deadline;
         const ampm = hour >= 12 ? "PM" : "AM";
         const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+        const status = task.status || (task.completed ? "completed" : "pending");
         const isCompleted = task.completed ? "completed" : "";
         const progress = task.progress || 0;
+
+        // Status badge
+        const statusBadgeMap = {
+          completed: `<span class="status-badge status-completed">✓ Completed</span>`,
+          late:      `<span class="status-badge status-late">⚠ Late</span>`,
+          missed:    `<span class="status-badge status-missed">✗ Missed</span>`,
+          pending:   ""
+        };
+        const statusBadge = statusBadgeMap[status] || "";
+
+        // Show delete for completed/late/missed; show complete btn for all non-missed, or undo if done
+        const canComplete = status !== "missed";
+        const completeLabel = task.completed ? "Undo" : (status === "missed" ? "" : "Complete");
+        const completeBtn = canComplete
+          ? `<button class="task-complete-btn" onclick="completeTask(${task.id})">${completeLabel}</button>`
+          : `<button class="task-complete-btn task-late-btn" onclick="completeTask(${task.id})">Mark Late</button>`;
+        const deleteBtn = (task.completed || status === "missed")
+          ? `<button class="task-delete-btn" onclick="deleteTask(${task.id})">Delete</button>`
+          : "";
         
-        let taskHTML = `<div class="task-item ${isCompleted}">
+        let taskHTML = `<div class="task-item ${isCompleted} status-${status}">
           <div class="task-container">
             <div class="task-text">
-              <strong>${task.name}</strong> - Deadline: ${displayHour}:00 ${ampm}, Priority: ${task.priority}
+              <strong>${task.name}</strong> — Deadline: ${displayHour}:00 ${ampm}, Priority: ${task.priority}
+              ${statusBadge}
             </div>
             <div class="task-buttons">
-              <button class="task-complete-btn" onclick="completeTask(${task.id})">
-                ${task.completed ? "Undo" : "Complete"}
-              </button>
+              ${completeBtn}
               <button class="task-edit-btn" onclick="openEditModal(${task.id}, '${task.name}', ${task.deadline}, '${task.priority}')">Edit</button>
-              ${task.completed ? `<button class="task-delete-btn" onclick="deleteTask(${task.id})">Delete</button>` : ""}
+              ${deleteBtn}
             </div>
           </div>
           <div class="task-progress-container">
@@ -314,7 +350,21 @@ function closeModal() {
   document.getElementById("dayModal").classList.remove("modal-visible");
 }
 
-function checkForUpcomingDeadlines() {
+function checkForMissedTasks() {
+  fetch("https://smart-task-scheduler-a7h9.onrender.com/check-missed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.updated_ids && data.updated_ids.length > 0) {
+      // Refresh the UI to reflect newly missed tasks
+      displayTasks();
+      loadCalendarEvents();
+    }
+  })
+  .catch(err => console.error("Error checking missed tasks:", err));
+}
   fetch("https://smart-task-scheduler-a7h9.onrender.com/tasks")
     .then(res => res.json())
     .then(tasks => {
@@ -356,4 +406,3 @@ function checkForUpcomingDeadlines() {
       });
     })
     .catch(err => console.error("Error checking deadlines: " + err));
-}
