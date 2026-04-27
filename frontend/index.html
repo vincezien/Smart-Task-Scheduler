@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Task Scheduler</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<h1>Smart Task Scheduler</h1>
+
+<button id="nightModeBtn" class="night-mode-btn" onclick="toggleNightMode()">Night Mode</button>
+
+<div class="form">
+  <input id="name" placeholder="Task Name">
+  <input id="deadline-date" type="date">
+  <select id="deadline-hour">
+    <option value="">Select Deadline Hour</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
+  </select>
+  <select id="deadline-ampm">
+    <option value="">Select AM/PM</option>
+    <option value="AM">AM</option>
+    <option value="PM">PM</option>
+  </select>
+  <select id="priority">
+    <option value="">Select Priority</option>
+    <option value="High">High</option>
+    <option value="Medium">Medium</option>
+    <option value="Low">Low</option>
+  </select>
+  <button onclick="addTask()">Add Task</button>
+  <button onclick="schedule()">Auto-Schedule</button>
+  <button onclick="compareAlgorithms()" id="compareBtn">Compare Algorithms</button>
+</div>
+
+<div id="compareResults" class="compare-results">
+  <h3>Algorithm Comparison</h3>
+  <div class="compare-row">
+    <div class="compare-col" id="greedyResult">
+      <strong>Greedy:</strong><br>
+      Tasks Scheduled: <span id="greedyTasks">-</span>
+    </div>
+    <div class="compare-col" id="bruteResult">
+      <strong>Brute-force:</strong><br>
+      Profit: <span id="bruteProfit">-</span>
+    </div>
+  </div>
+</div>
+<div id="calendar"></div>
+
+<!-- Edit Task Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <h2>Edit Task</h2>
+    <input type="hidden" id="editTaskId">
+    <input id="editTaskName" type="text" placeholder="Task Name">
+    <select id="editTaskDeadline">
+      <option value="">Select Deadline Hour</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+      <option value="11">11</option>
+      <option value="12">12</option>
+    </select>
+    <select id="editTaskAmpm">
+      <option value="">Select AM/PM</option>
+      <option value="AM">AM</option>
+      <option value="PM">PM</option>
+    </select>
+    <select id="editTaskPriority">
+      <option value="">Select Priority</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+    <button onclick="saveEdit()">Save</button>
+    <button onclick="closeEditModal()" class="close-btn">Cancel</button>
+  </div>
+</div>
+
+<!-- Modal for daily details -->
+<div id="dayModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalDate"></h2>
+    <ul id="modalTasks"></ul>
+    <button onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
