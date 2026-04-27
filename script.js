@@ -51,7 +51,7 @@ function loadCalendarEvents() {
   // Clear existing events
   calendar.removeAllEvents();
   
-  fetch("http://127.0.0.1:5000/tasks")
+  fetch("https://smart-task-scheduler-a7h9.onrender.com/tasks")
     .then(res => res.json())
     .then(tasks => {
       tasks.forEach(task => {
@@ -92,7 +92,7 @@ function addTask() {
   const deadline24 = convertTo24Hour(deadlineHour, deadlineAmpm);
   const defaultDuration = 1;
 
-  fetch("http://127.0.0.1:5000/add-task", {
+  fetch("https://smart-task-scheduler-a7h9.onrender.com/add-task", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -119,7 +119,7 @@ function addTask() {
 }
 
 function displayTasks() {
-  fetch("http://127.0.0.1:5000/tasks")
+  fetch("https://smart-task-scheduler-a7h9.onrender.com/tasks")
     .then(res => res.json())
     .then(tasks => {
       let taskList = document.getElementById("taskList");
@@ -173,7 +173,7 @@ function displayTasks() {
 
 function schedule() {
   const today = new Date().toISOString().split('T')[0];
-  fetch("http://127.0.0.1:5000/schedule")
+  fetch("https://smart-task-scheduler-a7h9.onrender.com/schedule")
     .then(res => res.json())
     .then(data => {
       calendar.removeAllEvents();
@@ -196,7 +196,7 @@ function toggleNightMode() {
 }
 
 function completeTask(taskId) {
-  fetch(`http://127.0.0.1:5000/complete-task/${taskId}`, {
+  fetch(`https://smart-task-scheduler-a7h9.onrender.com/complete-task/${taskId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" }
   })
@@ -215,7 +215,7 @@ function completeTask(taskId) {
 
 function deleteTask(taskId) {
   if (confirm("Are you sure you want to delete this task?")) {
-    fetch(`http://127.0.0.1:5000/delete-task/${taskId}`, {
+    fetch(`https://smart-task-scheduler-a7h9.onrender.com/delete-task/${taskId}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" }
     })
@@ -231,7 +231,7 @@ function deleteTask(taskId) {
 }
 
 function updateTaskProgress(taskId, progress) {
-  fetch(`http://127.0.0.1:5000/update-progress/${taskId}`, {
+  fetch(`https://smart-task-scheduler-a7h9.onrender.com/update-progress/${taskId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -279,7 +279,7 @@ function saveEdit() {
   // Convert 12-hour format with AM/PM to 24-hour format
   const deadline24 = convertTo24Hour(deadline, ampm);
 
-  fetch(`http://127.0.0.1:5000/update-task/${taskId}`, {
+  fetch(`https://smart-task-scheduler-a7h9.onrender.com/update-task/${taskId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -301,7 +301,7 @@ function saveEdit() {
 }
 
 function compareAlgorithms() {
-  fetch("http://127.0.0.1:5000/compare")
+  fetch("https://smart-task-scheduler-a7h9.onrender.com/compare")
     .then(res => res.json())
     .then(data => {
       document.getElementById("greedyTasks").innerText = data.greedy_tasks;
@@ -315,7 +315,7 @@ function closeModal() {
 }
 
 function checkForUpcomingDeadlines() {
-  fetch("http://127.0.0.1:5000/tasks")
+  fetch("https://smart-task-scheduler-a7h9.onrender.com/tasks")
     .then(res => res.json())
     .then(tasks => {
       const now = new Date();
